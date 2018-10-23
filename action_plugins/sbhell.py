@@ -65,6 +65,7 @@ class ActionModule(ActionBase):
         if log.get('debug', True):
             task_vars[self._task.register] = result
             self._task.args = {'var': self._task.register }
+            del self._task.register
 
             debug_action = self._shared_loader_obj.action_loader.get('debug',
                                                                        task=self._task,
