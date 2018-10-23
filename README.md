@@ -16,8 +16,8 @@ to run via the `command` parameter:
 
 ```yaml
 
- - name: sbhell task
-   sbhell: command='ls /'
+- name: sbhell task
+  sbhell: command='ls /'
 ```
 
 Additionally the module accepts an extra parameter `log` to enhance the logging
@@ -56,28 +56,29 @@ Additional parameters:
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
 ```yaml
-    - hosts: localhost
-      vars:
-        drush_executable   : '/opt/drush/9/drush'
-        drush_memory_limit : '3072M'
+- hosts: localhost
+  vars:
+    drush_executable   : '/opt/drush/9/drush'
+    drush_memory_limit : '3072M'
 
-      roles:
-         - { role: ansible-sbhell, drush_args: '-y --no-ansi' }
-      post_tasks:
-        - name: test shell
-          sbhell:
-          args:
-            command: 'ls /'
-            log:
-            enabled: true
-            debug: true
-            preserve: false
+  roles:
+    - { role: ansible-sbhell, drush_args: '-y --no-ansi' }
 
-        - name: test drush
-          drush:
-          args:
-            alias: '@d7'
-            command: php-eval "return ini_get(\"memory_limit\")"
+  tasks:
+    - name: test shell
+      sbhell:
+      args:
+        command: 'ls /'
+        log:
+          enabled: true
+          debug: true
+          preserve: false
+
+    - name: test drush
+      drush:
+      args:
+        alias: '@d7'
+        command: php-eval "return ini_get(\"memory_limit\")"
 ```
 
 
