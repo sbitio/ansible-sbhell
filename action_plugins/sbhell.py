@@ -63,18 +63,14 @@ class ActionModule(ActionBase):
             os.unlink(logfile)
 
         if log.get('debug', True):
-            task_vars[self._task.register] = result
-            self._task.args = {'var': self._task.register }
-            del self._task.register
+            # Format the result as the debug module does.
+            debug = self._templar.template(result, convert_bare=True, fail_on_undefined=True, bare_deprecated=False)
+            result['_ansible_verbose_always'] = True
+            result[self._task.register] = debug
 
-            debug_action = self._shared_loader_obj.action_loader.get('debug',
-                                                                       task=self._task,
-                                                                       connection=self._connection,
-                                                                       play_context=self._play_context,
-                                                                       loader=self._loader,
-                                                                       templar=self._templar,
-                                                                       shared_loader_obj=self._shared_loader_obj)
-            debug_result = debug_action.run(task_vars=task_vars)
-            result = debug_result
+            # Green message is nice.
+            result['changed'] = False
+            # Drop unneccesary output.
+            del result['stdout']
 
         return result
