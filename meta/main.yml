@@ -1,0 +1,7 @@
+galaxy_info:
+  author: sbitio
+  description: Ansible role providing modules (action plugins) to ease shell invocations.
+  company: SB IT Media, S.L.
+  license: MIT
+  min_ansible_version: 2.6
+dependencies: []
