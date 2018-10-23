@@ -2,8 +2,8 @@
 # defaults file for sbhell
 
 drush_executable   : drush
-drush_args         : -y --nocolor
-drush_alias        : @none
+drush_args         : '-y --nocolor'
+drush_alias        : '@none'
 drush_command      : status
 #drush_memory_limit :
 
