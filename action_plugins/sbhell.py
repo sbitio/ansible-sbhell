@@ -6,7 +6,7 @@ __metaclass__ = type
 from ansible.plugins.action import ActionBase
 from ansible.utils.vars import merge_hash
 import os
-from tempfile import mkstemp
+import uuid
 
 try:
     from __main__ import display
@@ -36,10 +36,12 @@ class ActionModule(ActionBase):
         if log:
           del self._task.args['log']
         if log.get('enabled', True):
-            logfile = log.get('logfile', mkstemp())
+            logfile = log.get('logfile', '/tmp/ansible-sbhell-' + str(uuid.uuid4()))
             # Copy command stdout and stderr to a logfile, while preserving the original file descriptors.
-            command = "{ %(command)s 2>&1 1>&3 3>&- | tee -a %(logfile)s; } 3>&1 1>&2 | tee -a %(logfile)s" % {'command': command, 'logfile': logfile[1]}
-            display.display("Command output is logged to: " + logfile[1])
+            command = "{ %(command)s 2>&1 1>&3 3>&- | tee -a %(logfile)s; } 3>&1 1>&2 | tee -a %(logfile)s" % {'command': command, 'logfile': logfile}
+            display.display("Command output is logged to: " + logfile)
+            if not log.get('preserve', True):
+                command += '; rm %s' % logfile
         else:
             command = "%(command)s" % {'command': command}
 
@@ -59,8 +61,6 @@ class ActionModule(ActionBase):
                                                                    shared_loader_obj=self._shared_loader_obj)
         result = command_action.run(task_vars=task_vars)
 
-        if log.get('disable', False) and log.get('preserve', True):
-            os.unlink(logfile)
 
         if log.get('debug', True):
             # Format the result as the debug module does.
