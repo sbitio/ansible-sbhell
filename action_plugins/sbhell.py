@@ -46,8 +46,6 @@ class ActionModule(ActionBase):
             display.display("Command output is logged to: " + logfile)
             if not log.get('preserve', True):
                 command += '; rm %s' % logfile
-        else:
-            command = "%(command)s" % {'command': command}
 
         # This is the internal free form option.
         self._task.args['_raw_params'] = command
@@ -64,7 +62,6 @@ class ActionModule(ActionBase):
                                                                    templar=self._templar,
                                                                    shared_loader_obj=self._shared_loader_obj)
         result = command_action.run(task_vars=task_vars)
-
 
         if log.get('debug', True):
             # Format the result as the debug module does.
