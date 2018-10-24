@@ -31,6 +31,10 @@ class ActionModule(ActionBase):
         command = self._task.args['command']
         del self._task.args['command']
 
+        # Set /bin/bash to support set -o pipefail.
+        if not self._task.args.has_key('executable'):
+            self._task.args['executable'] = '/bin/bash'
+
         # Prepare the command to run.
         log = self._task.args.get('log', dict())
         if log:
@@ -38,7 +42,7 @@ class ActionModule(ActionBase):
         if log.get('enabled', True):
             logfile = log.get('logfile', '/tmp/ansible-sbhell-' + str(uuid.uuid4()))
             # Copy command stdout and stderr to a logfile, while preserving the original file descriptors.
-            command = "{ %(command)s 2>&1 1>&3 3>&- | tee -a %(logfile)s; } 3>&1 1>&2 | tee -a %(logfile)s" % {'command': command, 'logfile': logfile}
+            command = "set -o pipefail; { %(command)s 2>&1 1>&3 3>&- | tee -a %(logfile)s; } 3>&1 1>&2 | tee -a %(logfile)s" % {'command': command, 'logfile': logfile}
             display.display("Command output is logged to: " + logfile)
             if not log.get('preserve', True):
                 command += '; rm %s' % logfile
