@@ -25,34 +25,42 @@ class ActionModule(ActionBase):
         self._task.args['_uses_shell'] = True
 
         ### Process sbitio args.
-
-        # free_form feature is restricted to a hardcoded list in parsing/mod_args.py.
-        # So we provide the custom 'command' option instead.
-        command = self._task.args['command']
-        del self._task.args['command']
-
-        # Set /bin/bash to support set -o pipefail.
-        if not self._task.args.has_key('executable'):
-            self._task.args['executable'] = '/bin/bash'
-
-        # Prepare the command to run.
         log = self._task.args.get('log', dict())
-        if log:
-          del self._task.args['log']
-        if log.get('enabled', True):
-            logfile = log.get('logfile', '/tmp/ansible-sbhell-' + str(uuid.uuid4()))
-            # Copy command stdout and stderr to a logfile, while preserving the original file descriptors.
-            command = "set -o pipefail; { %(command)s 2>&1 1>&3 3>&- | tee -a %(logfile)s; } 3>&1 1>&2 | tee -a %(logfile)s" % {'command': command, 'logfile': logfile}
-            display.display("Command output is logged to: " + logfile)
-            if not log.get('preserve', True):
-                command += '; rm %s' % logfile
 
-        # This is the internal free form option.
-        self._task.args['_raw_params'] = command
+        # '_raw_params' is the free_form feature. It is is restricted to
+        # a hardcoded list in parsing/mod_args.py.
+        # So we accept the command to run in the 'command' option instead.
+        # The provided command is enriched with our execution options
+        # (pipefail, logging,..) and assigned to the free_form option.
 
-        # Ensure the output is registered, if debug logging is enabled.
-        if log.get('debug', True) and not self._task.register:
-            self._task.register = 'command_result'
+        # Additionally, ensure we do this only once because the args
+        # are preserved across iterations in retrying tasks ('until: ...').
+        initialized = self._task.args.has_key('_raw_params')
+
+        if not initialized:
+            command = self._task.args.get('command')
+            del self._task.args['command']
+
+            # Set /bin/bash to support set -o pipefail.
+            if not self._task.args.has_key('executable'):
+                self._task.args['executable'] = '/bin/bash'
+
+            # Prepare the command to run.
+            if log:
+              del self._task.args['log']
+            if log.get('enabled', True):
+                logfile = log.get('logfile', '/tmp/ansible-sbhell-' + str(uuid.uuid4()))
+                # Copy command stdout and stderr to a logfile, while preserving the original file descriptors.
+                command = "set -o pipefail; { %(command)s 2>&1 1>&3 3>&- | tee -a %(logfile)s; } 3>&1 1>&2 | tee -a %(logfile)s" % {'command': command, 'logfile': logfile}
+                display.display("Command output is logged to: " + logfile)
+                if not log.get('preserve', True):
+                    command += '; rm %s' % logfile
+
+            self._task.args['_raw_params'] = command
+
+            # Ensure the output is registered, if debug logging is enabled.
+            if log.get('debug', True) and not self._task.register:
+                self._task.register = 'command_result'
 
         command_action = self._shared_loader_obj.action_loader.get('command',
                                                                    task=self._task,
