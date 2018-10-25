@@ -52,7 +52,13 @@ class ActionModule(ActionBase):
                 logfile = log.get('logfile', '/tmp/ansible-sbhell-' + str(uuid.uuid4()))
                 # Copy command stdout and stderr to a logfile, while preserving the original file descriptors.
                 command = "set -o pipefail; { %(command)s 2>&1 1>&3 3>&- | tee -a %(logfile)s; } 3>&1 1>&2 | tee -a %(logfile)s" % {'command': command, 'logfile': logfile}
-                display.display("Command output is logged to: " + logfile)
+
+                # Inform the user of the logfile.
+                if task_vars.has_key('item'):
+                    prefix = "[%s] => (item=%s)" % (task_vars['inventory_hostname'], task_vars['item'])
+                else:
+                    prefix = "[%s]" % task_vars['inventory_hostname']
+                display.display("%s Command output is logged to: %s" % (prefix, logfile))
                 if not log.get('preserve', True):
                     command += '; rm %s' % logfile
 
