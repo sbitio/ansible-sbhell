@@ -26,6 +26,11 @@ class ActionModule(ActionBase):
 
         ### Process sbitio args.
         log = self._task.args.get('log', dict())
+        if log is False:
+            log = {
+                'enabled': False,
+                'debug': False,
+            }
 
         # '_raw_params' is the free_form feature. It is is restricted to
         # a hardcoded list in parsing/mod_args.py.
