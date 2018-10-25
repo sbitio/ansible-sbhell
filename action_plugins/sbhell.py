@@ -85,7 +85,5 @@ class ActionModule(ActionBase):
 
             # Green message is nice.
             result['changed'] = False
-            # Drop unneccesary output.
-            del result['stdout']
 
         return result
