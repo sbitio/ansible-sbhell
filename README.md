@@ -40,20 +40,19 @@ log:
 
 [Drush](https://github.com/drush-ops/drush) invocations via sbhell.
 
-It accepts the same parameters as the `sbhell` module above but `command`.
+It accepts the same parameters as the `sbhell` module above. In this case `command`
+is the drush command to run.
 
 Additional parameters:
 
  * `executable`: path to drush executable. Defaults to 'drush'
- * `args`:' arguments to provide for the command execution. Defaults to '-y --nocolor'
+ * `args`: arguments to provide for the command execution. Defaults to '-y --nocolor'
  * `alias`: Drush alias. Defaults to '@none'
  * `command`: Drush command. Defaults to 'status'
  * `memory_limit`: PHP memory limit. Not set if empty
 
 
 ## Example Playbook
-
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
 ```yaml
 - hosts: localhost
@@ -79,6 +78,13 @@ Including an example of how to use your role (for instance, with variables passe
       args:
         alias: '@d7'
         command: php-eval "return ini_get(\"memory_limit\")"
+
+    - name: test drush
+      drush:
+      args:
+        executable: '/opt/drush/8/drush'
+        command: -l http://example.com php-eval "return ini_get(\"memory_limit\")"
+        chdir: /var/www/example.com/currrent/docroot
 ```
 
 
