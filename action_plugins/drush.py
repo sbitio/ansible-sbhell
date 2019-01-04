@@ -30,7 +30,7 @@ class ActionModule(ActionBase):
             value = self._task.args[param]
             del self._task.args[param]
 
-        return value
+        return self._templar.template(value)
 
 
     def run(self, tmp=None, task_vars=None):
