@@ -84,7 +84,7 @@ class ActionModule(ActionBase):
 
         if log.get('debug', True):
             # Format the result as the debug module does.
-            debug = self._templar.template(result, convert_bare=True, fail_on_undefined=True, bare_deprecated=False)
+            debug = self._templar.template(result, convert_bare=True, fail_on_undefined=True)
             result['_ansible_verbose_always'] = True
             result[self._task.register] = debug
 
