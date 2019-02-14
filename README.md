@@ -1,7 +1,24 @@
 # Ansible s(b)hell
 
-Ansible role providing modules (action plugins) to ease shell invocations.
+#### Table of Contents
 
+1. [Description](#description)
+2. [Modules](#modules)
+    * [sbhell](#sbhell)
+    * [drush](#drush)
+3. [Example playbook](#example-playbook)
+    * [Output](#output)
+4. [License](#license)
+5. [Author Information](#author-information)
+
+
+## Description
+
+This is an Ansible role that provides two modules (action plugins):
+
+ * sbhell: ease shell invocations by providing extra logging capabilities
+ * drush: ease performing [Drush](https://github.com/drush-ops/drush)
+ invocations. Built on top of sbhell.
 
 
 ## Modules
@@ -58,6 +75,7 @@ Additional parameters:
 - hosts: localhost
   vars:
     drush_executable   : '/opt/drush/9/drush'
+    drush_args         : '-y --no-ansi'
     drush_memory_limit : '3072M'
 
   roles:
@@ -76,24 +94,213 @@ Additional parameters:
     - name: test drush
       drush:
       args:
-        alias: '@d7'
+        alias: '@d8'
         command: php-eval "return ini_get(\"memory_limit\")"
 
-    - name: test drush
+    - name: test drush without an alias
       drush:
       args:
         executable: '/opt/drush/8/drush'
-        command: -l http://example.com php-eval "return ini_get(\"memory_limit\")"
-        chdir: /var/www/example.com/currrent/docroot
+        command: -l http://d7 php-eval "return ini_get(\"memory_limit\")"
+        chdir: /var/www/d7/docroot
 ```
 
+### Output
 
-License
--------
+```shell
+$ ansible-playbook test.yml
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [localhost]
+
+TASK [test shell] **************************************************************
+[localhost] Command output is logged to: /tmp/ansible-sbhell-927fad98-d552-4b51-8364-6d03d2d384d3
+ok: [localhost] => {
+    "changed": false, 
+    "cmd": "set -o pipefail; { ls / 2>&1 1>&3 3>&- | tee -a /tmp/ansible-sbhell-927fad98-d552-4b51-8364-6d03d2d384d3; } 3>&1 1>&2 | tee -a /tmp/ansible-sbhell-927fad98-d552-4b51-8364-6d03d2d384d3; rm /tmp/ansible-sbhell-927fad98-d552-4b51-8364-6d03d2d384d3", 
+    "command_result": {
+        "changed": true, 
+        "cmd": "set -o pipefail; { ls / 2>&1 1>&3 3>&- | tee -a /tmp/ansible-sbhell-927fad98-d552-4b51-8364-6d03d2d384d3; } 3>&1 1>&2 | tee -a /tmp/ansible-sbhell-927fad98-d552-4b51-8364-6d03d2d384d3; rm /tmp/ansible-sbhell-927fad98-d552-4b51-8364-6d03d2d384d3", 
+        "delta": "0:00:00.003405", 
+        "end": "2019-02-14 19:21:09.685161", 
+        "invocation": {
+            "module_args": {
+                "_raw_params": "set -o pipefail; { ls / 2>&1 1>&3 3>&- | tee -a /tmp/ansible-sbhell-927fad98-d552-4b51-8364-6d03d2d384d3; } 3>&1 1>&2 | tee -a /tmp/ansible-sbhell-927fad98-d552-4b51-8364-6d03d2d384d3; rm /tmp/ansible-sbhell-927fad98-d552-4b51-8364-6d03d2d384d3", 
+                "_uses_shell": true, 
+                "argv": null, 
+                "chdir": null, 
+                "creates": null, 
+                "executable": "/bin/bash", 
+                "removes": null, 
+                "stdin": null, 
+                "warn": true
+            }
+        }, 
+        "rc": 0, 
+        "start": "2019-02-14 19:21:09.681756", 
+        "stderr": "", 
+        "stderr_lines": [], 
+        "stdout": "bin\nboot\ndev\netc\nhome\ninitrd.img\ninitrd.img.old\nlib\nlib64\nlost+found\nmedia\nmnt\nopt\nproc\nroot\nrun\nsbin\nsrv\nsys\ntmp\nusr\nvar\nvmlinuz\nvmlinuz.old", 
+        "stdout_lines": [
+            "bin", 
+            "boot", 
+            "dev", 
+            "etc", 
+            "home", 
+            "initrd.img", 
+            "initrd.img.old", 
+            "lib", 
+            "lib64", 
+            "lost+found", 
+            "media", 
+            "mnt", 
+            "opt", 
+            "proc", 
+            "root", 
+            "run", 
+            "sbin", 
+            "srv", 
+            "sys", 
+            "tmp", 
+            "usr", 
+            "var", 
+            "vmlinuz", 
+            "vmlinuz.old"
+        ]
+    }, 
+    "delta": "0:00:00.003405", 
+    "end": "2019-02-14 19:21:09.685161", 
+    "rc": 0, 
+    "start": "2019-02-14 19:21:09.681756", 
+    "stderr": "", 
+    "stderr_lines": [], 
+    "stdout": "bin\nboot\ndev\netc\nhome\ninitrd.img\ninitrd.img.old\nlib\nlib64\nlost+found\nmedia\nmnt\nopt\nproc\nroot\nrun\nsbin\nsrv\nsys\ntmp\nusr\nvar\nvmlinuz\nvmlinuz.old", 
+    "stdout_lines": [
+        "bin", 
+        "boot", 
+        "dev", 
+        "etc", 
+        "home", 
+        "initrd.img", 
+        "initrd.img.old", 
+        "lib", 
+        "lib64", 
+        "lost+found", 
+        "media", 
+        "mnt", 
+        "opt", 
+        "proc", 
+        "root", 
+        "run", 
+        "sbin", 
+        "srv", 
+        "sys", 
+        "tmp", 
+        "usr", 
+        "var", 
+        "vmlinuz", 
+        "vmlinuz.old"
+    ]
+}
+
+TASK [test drush] **************************************************************
+[localhost] Command output is logged to: /tmp/ansible-sbhell-0ae267c4-f8ab-4bde-b82a-f5a2be128ca9
+ok: [localhost] => {
+    "changed": false, 
+    "cmd": "set -o pipefail; { /opt/drush/9/drush @d8 -y --no-ansi php-eval \"return ini_get(\\\"memory_limit\\\")\" 2>&1 1>&3 3>&- | tee -a /tmp/ansible-sbhell-0ae267c4-f8ab-4bde-b82a-f5a2be128ca9; } 3>&1 1>&2 | tee -a /tmp/ansible-sbhell-0ae267c4-f8ab-4bde-b82a-f5a2be128ca9", 
+    "command_result": {
+        "changed": true, 
+        "cmd": "set -o pipefail; { /opt/drush/9/drush @d8 -y --no-ansi php-eval \"return ini_get(\\\"memory_limit\\\")\" 2>&1 1>&3 3>&- | tee -a /tmp/ansible-sbhell-0ae267c4-f8ab-4bde-b82a-f5a2be128ca9; } 3>&1 1>&2 | tee -a /tmp/ansible-sbhell-0ae267c4-f8ab-4bde-b82a-f5a2be128ca9", 
+        "delta": "0:00:00.148535", 
+        "end": "2019-02-14 19:21:09.941557", 
+        "invocation": {
+            "module_args": {
+                "_raw_params": "set -o pipefail; { /opt/drush/9/drush @d8 -y --no-ansi php-eval \"return ini_get(\\\"memory_limit\\\")\" 2>&1 1>&3 3>&- | tee -a /tmp/ansible-sbhell-0ae267c4-f8ab-4bde-b82a-f5a2be128ca9; } 3>&1 1>&2 | tee -a /tmp/ansible-sbhell-0ae267c4-f8ab-4bde-b82a-f5a2be128ca9", 
+                "_uses_shell": true, 
+                "argv": null, 
+                "chdir": null, 
+                "creates": null, 
+                "executable": "/bin/bash", 
+                "removes": null, 
+                "stdin": null, 
+                "warn": true
+            }
+        }, 
+        "rc": 0, 
+        "start": "2019-02-14 19:21:09.793022", 
+        "stderr": "", 
+        "stderr_lines": [], 
+        "stdout": "d8d8d8d8d8-1", 
+        "stdout_lines": [
+            "d8d8d8d8d8-1"
+        ]
+    }, 
+    "delta": "0:00:00.148535", 
+    "end": "2019-02-14 19:21:09.941557", 
+    "rc": 0, 
+    "start": "2019-02-14 19:21:09.793022", 
+    "stderr": "", 
+    "stderr_lines": [], 
+    "stdout": "d8d8d8d8d8-1", 
+    "stdout_lines": [
+        "d8d8d8d8d8-1"
+    ]
+}
+
+TASK [test drush without an alias] *********************************************
+[localhost] Command output is logged to: /tmp/ansible-sbhell-f754eb69-9c5c-44fa-8714-4c34e43dae55
+ok: [localhost] => {
+    "changed": false, 
+    "cmd": "set -o pipefail; { /opt/drush/8/drush @none -y --no-ansi -l http://d7 php-eval \"return ini_get(\\\"memory_limit\\\")\" 2>&1 1>&3 3>&- | tee -a /tmp/ansible-sbhell-f754eb69-9c5c-44fa-8714-4c34e43dae55; } 3>&1 1>&2 | tee -a /tmp/ansible-sbhell-f754eb69-9c5c-44fa-8714-4c34e43dae55", 
+    "command_result": {
+        "changed": true, 
+        "cmd": "set -o pipefail; { /opt/drush/8/drush @none -y --no-ansi -l http://d7 php-eval \"return ini_get(\\\"memory_limit\\\")\" 2>&1 1>&3 3>&- | tee -a /tmp/ansible-sbhell-f754eb69-9c5c-44fa-8714-4c34e43dae55; } 3>&1 1>&2 | tee -a /tmp/ansible-sbhell-f754eb69-9c5c-44fa-8714-4c34e43dae55", 
+        "delta": "0:00:00.089838", 
+        "end": "2019-02-14 19:21:10.141745", 
+        "invocation": {
+            "module_args": {
+                "_raw_params": "set -o pipefail; { /opt/drush/8/drush @none -y --no-ansi -l http://d7 php-eval \"return ini_get(\\\"memory_limit\\\")\" 2>&1 1>&3 3>&- | tee -a /tmp/ansible-sbhell-f754eb69-9c5c-44fa-8714-4c34e43dae55; } 3>&1 1>&2 | tee -a /tmp/ansible-sbhell-f754eb69-9c5c-44fa-8714-4c34e43dae55", 
+                "_uses_shell": true, 
+                "argv": null, 
+                "chdir": "/var/www/d7/docroot", 
+                "creates": null, 
+                "executable": "/bin/bash", 
+                "removes": null, 
+                "stdin": null, 
+                "warn": true
+            }
+        }, 
+        "rc": 0, 
+        "start": "2019-02-14 19:21:10.051907", 
+        "stderr": "", 
+        "stderr_lines": [], 
+        "stdout": "'3072M'", 
+        "stdout_lines": [
+            "'3072M'"
+        ]
+    }, 
+    "delta": "0:00:00.089838", 
+    "end": "2019-02-14 19:21:10.141745", 
+    "rc": 0, 
+    "start": "2019-02-14 19:21:10.051907", 
+    "stderr": "", 
+    "stderr_lines": [], 
+    "stdout": "'3072M'", 
+    "stdout_lines": [
+        "'3072M'"
+    ]
+}
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=4    changed=0    unreachable=0    failed=0   
+```
+
+## License
 
 MIT
 
-Author Information
-------------------
+## Author Information
 
 SB IT Media, S.L.
