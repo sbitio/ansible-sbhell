@@ -6,6 +6,7 @@ __metaclass__ = type
 from ansible.plugins.action import ActionBase
 from ansible.utils.vars import merge_hash
 import os
+import re
 import uuid
 
 try:
@@ -54,7 +55,12 @@ class ActionModule(ActionBase):
             if log:
               del self._task.args['log']
             if log.get('enabled', True):
-                logfile = log.get('logfile', '/tmp/ansible-sbhell-' + str(uuid.uuid4()))
+                logfile_default = '-'.join([
+                    '/tmp/ansible-sbhell',
+                    re.sub('\W+','_', self._task.name.lower()[:80]),
+                    str(uuid.uuid4())
+                ])
+                logfile = log.get('logfile', logfile_default)
                 # Copy command stdout and stderr to a logfile, while preserving the original file descriptors.
                 command = "set -o pipefail; { %(command)s 2>&1 1>&3 3>&- | tee -a %(logfile)s; } 3>&1 1>&2 | tee -a %(logfile)s" % {'command': command, 'logfile': logfile}
 
