@@ -42,14 +42,14 @@ class ActionModule(ActionBase):
 
         # Additionally, ensure we do this only once because the args
         # are preserved across iterations in retrying tasks ('until: ...').
-        initialized = self._task.args.has_key('_raw_params')
+        initialized = '_raw_params' in self._task.args
 
         if not initialized:
             command = self._task.args.get('command')
             del self._task.args['command']
 
             # Set /bin/bash to support set -o pipefail.
-            if not self._task.args.has_key('executable'):
+            if not 'executable' in self._task.args:
                 self._task.args['executable'] = '/bin/bash'
 
             # Prepare the command to run.
@@ -71,7 +71,7 @@ class ActionModule(ActionBase):
                 command = "set -o pipefail; { %(command)s 2>&1 1>&3 3>&- %(tee)s } 3>&1 1>&2 %(tee)s" % {'command': command, 'tee': tee}
 
                 # Inform the user of the logfile.
-                if task_vars.has_key('item'):
+                if 'item' in task_vars:
                     prefix = "[%s] => (item=%s)" % (task_vars['inventory_hostname'], task_vars['item'])
                 else:
                     prefix = "[%s]" % task_vars['inventory_hostname']

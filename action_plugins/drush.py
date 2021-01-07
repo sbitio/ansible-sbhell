@@ -26,7 +26,7 @@ class ActionModule(ActionBase):
         'drush_' prefix is added.
         """
         value = self.task_vars.get('drush_' + param, default)
-        if self._task.args.has_key(param):
+        if param in self._task.args:
             value = self._task.args[param]
             del self._task.args[param]
 
