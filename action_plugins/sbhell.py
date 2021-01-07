@@ -30,6 +30,7 @@ class ActionModule(ActionBase):
         if log is False:
             log = {
                 'enabled': False,
+                'logfile': False,
                 'debug': False,
             }
 
@@ -61,8 +62,13 @@ class ActionModule(ActionBase):
                     str(uuid.uuid4())
                 ])
                 logfile = log.get('logfile', logfile_default)
+                if logfile:
+                    tee = "| tee -a %(logfile)s" % {'logfile': logfile};
+                else:
+                    tee = ''
+
                 # Copy command stdout and stderr to a logfile, while preserving the original file descriptors.
-                command = "set -o pipefail; { %(command)s 2>&1 1>&3 3>&- | tee -a %(logfile)s; } 3>&1 1>&2 | tee -a %(logfile)s" % {'command': command, 'logfile': logfile}
+                command = "set -o pipefail; { %(command)s 2>&1 1>&3 3>&- %(tee)s } 3>&1 1>&2 %(tee)s" % {'command': command, 'tee': tee}
 
                 # Inform the user of the logfile.
                 if task_vars.has_key('item'):
