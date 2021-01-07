@@ -63,12 +63,12 @@ class ActionModule(ActionBase):
                 ])
                 logfile = log.get('logfile', logfile_default)
                 if logfile:
-                    tee = "| tee -a %(logfile)s" % {'logfile': logfile};
+                    tee = "| tee -a %(logfile)s" % {'logfile': logfile}
                 else:
                     tee = ''
 
                 # Copy command stdout and stderr to a logfile, while preserving the original file descriptors.
-                command = "set -o pipefail; { %(command)s 2>&1 1>&3 3>&- %(tee)s } 3>&1 1>&2 %(tee)s" % {'command': command, 'tee': tee}
+                command = "set -o pipefail; { %(command)s 2>&1 1>&3 3>&- %(tee)s; } 3>&1 1>&2 %(tee)s" % {'command': command, 'tee': tee}
 
                 # Inform the user of the logfile.
                 if 'item' in task_vars:
