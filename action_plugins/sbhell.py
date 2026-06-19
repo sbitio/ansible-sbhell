@@ -32,6 +32,8 @@ class ActionModule(ActionBase):
                 'enabled': False,
                 'logfile': False,
                 'debug': False,
+                'stderr': False,
+                'stdout': False,
             }
 
         # '_raw_params' is the free_form feature. It is is restricted to
@@ -53,8 +55,9 @@ class ActionModule(ActionBase):
                 self._task.args['executable'] = '/bin/bash'
 
             # Prepare the command to run.
-            if log:
+            if 'log' in self._task.args:
               del self._task.args['log']
+
             if log.get('enabled', True):
                 logfile_default = '-'.join([
                     '/tmp/ansible-sbhell',
@@ -70,14 +73,16 @@ class ActionModule(ActionBase):
                 # Copy command stdout and stderr to a logfile, while preserving the original file descriptors.
                 command = "set -o pipefail; { %(command)s 2>&1 1>&3 3>&- %(tee)s; } 3>&1 1>&2 %(tee)s" % {'command': command, 'tee': tee}
 
-                # Inform the user of the logfile.
-                if 'item' in task_vars:
-                    prefix = "[%s] => (item=%s)" % (task_vars['inventory_hostname'], task_vars['item'])
-                else:
-                    prefix = "[%s]" % task_vars['inventory_hostname']
-                display.display("%s Command output is logged to: %s" % (prefix, logfile))
                 if not log.get('preserve', True):
                     command += '; rm %s' % logfile
+
+                # Inform the user of the logfile.
+                if logfile:
+                    if 'item' in task_vars:
+                        message = "[%s] => (item=%s)" % (task_vars['inventory_hostname'], task_vars['item'])
+                    else:
+                        message = "[%s]" % task_vars['inventory_hostname']
+                    display.display("%s Command output is logged to: %s" % (message, logfile))
 
             self._task.args['_raw_params'] = command
 
