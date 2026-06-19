@@ -77,7 +77,14 @@ class ActionModule(ActionBase):
 
             # Ensure the output is registered, if debug logging is enabled.
             if log.get('debug', True) and not self._task.register:
-                self._task.register = 'command_result'
+                if hasattr(self._task, '_validate_register'):
+                    # ansible-core >= 2.21 stores `register` as a dict mapping
+                    # var name -> result expression rather than a plain string.
+                    # Let Task normalize it the same way the parser would for
+                    # a `register: command_result` task attribute.
+                    self._task._validate_register(None, 'register', 'command_result')
+                else:
+                    self._task.register = 'command_result'
 
         command_action = self._shared_loader_obj.action_loader.get('command',
                                                                    task=self._task,
@@ -92,7 +99,9 @@ class ActionModule(ActionBase):
             # Format the result as the debug module does.
             debug = self._templar.template(result, convert_bare=True, fail_on_undefined=True)
             result['_ansible_verbose_always'] = True
-            result[self._task.register] = debug
+            register = self._task.register
+            register_name = next(iter(register)) if isinstance(register, dict) else register
+            result[register_name] = debug
 
             # Green message is nice.
             result['changed'] = False
